@@ -10,8 +10,8 @@ on:
 
 env:
   FNSS_REPO: 'haierkeys/fast-note-sync-service'
-  FNSS_GIT_TAG: '2.1.2'
-  FNSS_VERSION: '2.1.2'
+  FNSS_GIT_TAG: '2.1.3'
+  FNSS_VERSION: '2.1.3'
 
 jobs:
   build:
