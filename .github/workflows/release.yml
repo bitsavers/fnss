@@ -1,0 +1,229 @@
+name: Build and release fnss
+
+on:
+  push:
+    branches: 
+      - pkg-master
+  workflow_dispatch:
+  repository_dispatch:
+    types: fnss-release
+
+env:
+  FNSS_REPO: 'haierkeys/fast-note-sync-service'
+  FNSS_GIT_TAG: '2.1.2'
+  FNSS_VERSION: '2.1.2'
+
+jobs:
+  build:
+    name: Build and release fnss
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dist:
+          # its dependency https://github.com/bytedance/sonic does not support 32bit and MIPS arch.
+          # windows
+          - {
+              name: windows-amd64-v1,
+              goos: windows,
+              goarch: amd64,
+              goamd64: v1,
+              # cc: x86_64-w64-mingw32-gcc,
+              # cxx: x86_64-w64-mingw32-g++
+            }
+          - {
+              name: windows-amd64-v2,
+              goos: windows,
+              goarch: amd64,
+              goamd64: v2,
+              # cc: x86_64-w64-mingw32-gcc,
+              # cxx: x86_64-w64-mingw32-g++
+            }
+          - {
+              name: windows-amd64-v3,
+              goos: windows,
+              goarch: amd64,
+              goamd64: v3,
+              # cc: x86_64-w64-mingw32-gcc,
+              # cxx: x86_64-w64-mingw32-g++
+            }
+          - {
+              name: windows-arm64,
+              goos: windows,
+              goarch: arm64
+            }
+          # linux  
+          - {
+              name: linux-amd64-v1,
+              goos: linux,
+              goarch: amd64,
+              goamd64: v1
+            }
+          - {
+              name: linux-amd64-v2,
+              goos: linux,
+              goarch: amd64,
+              goamd64: v2
+            }
+          - {
+              name: linux-amd64-v3,
+              goos: linux,
+              goarch: amd64,
+              goamd64: v3
+            }
+          - {
+              name: linux-arm64,
+              goos: linux,
+              goarch: arm64
+            }
+          - {
+              name: linux-s390x,
+              goos: linux,
+              goarch: s390x
+            }
+          - {
+              name: linux-riscv64,
+              goos: linux,
+              goarch: riscv64
+            }
+          # darwin  
+          - {
+              name: darwin-amd64-v1,
+              goos: darwin,
+              goarch: amd64,
+              goamd64: v1,
+              # cc: o64-clang,
+              # cxx: o64-clang++
+            }
+          - {
+              name: darwin-amd64-v2,
+              goos: darwin,
+              goarch: amd64,
+              goamd64: v2,
+              # cc: o64-clang,
+              # cxx: o64-clang++
+            }
+          - {
+              name: darwin-amd64-v3,
+              goos: darwin,
+              goarch: amd64,
+              goamd64: v3,
+              # cc: o64-clang,
+              # cxx: o64-clang++
+            }
+          - {
+              name: darwin-arm64,
+              goos: darwin,
+              goarch: arm64,
+              # cc: oa64-clang,
+              # cxx: oa64-clang++
+            }
+          # freebsd
+          - {
+              name: freebsd-amd64-v1,
+              goos: freebsd,
+              goarch: amd64,
+              goamd64: v1
+            }
+          - {
+              name: freebsd-amd64-v2,
+              goos: freebsd,
+              goarch: amd64,
+              goamd64: v2
+            }
+          - {
+              name: freebsd-amd64-v3,
+              goos: freebsd,
+              goarch: amd64,
+              goamd64: v3
+            }
+          - {
+              name: freebsd-arm64,
+              goos: freebsd,
+              goarch: arm64
+            }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: 'master'
+          fetch-depth: 1
+          path: ./src
+
+      # - name: Get latest go version
+      #   id: version
+      #   run: |
+      #     echo "go_version=$(curl -sX GET https://go.dev/dl/?mode=json | jq -r '.[0].files[0].version | .[2:]')" >> $GITHUB_OUTPUT
+
+      # - name: Set up Go
+      #   uses: actions/setup-go@v6
+      #   with:
+      #     go-version: ${{ steps.version.outputs.go_version }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: '${{ github.workspace }}/src/go.mod'
+
+      - name: Cache go module
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+          key: go-${{ hashFiles('**/go.sum') }}
+
+      - name: Prepare
+        id: prepare
+        run: |
+          FNSS_BUILD_TIME=$(date +%FT%T%z)
+          echo "fnss_build_time=${FNSS_BUILD_TIME}" >> $GITHUB_OUTPUT
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.dist.goos }}
+          GOARCH: ${{ matrix.dist.goarch }}
+          GOAMD64: ${{ matrix.dist.goamd64 }}
+          GOARM: ${{ matrix.dist.goarm }}
+          GOMIPS: ${{ matrix.dist.gomips }}
+          CGO_ENABLED: 0
+        run: |
+          mkdir -p ${{ github.workspace }}/build_assets
+          cd ${{ github.workspace }}/src
+          go build -v -trimpath \
+            -o ${{ github.workspace }}/build_assets/fast-note-sync-service \
+            -ldflags "-X github.com/${{ env.FNSS_REPO }}/internal/app.Version=${{ env.FNSS_VERSION }} \
+            -X github.com/${{ env.FNSS_REPO }}/internal/app.GitTag=${{ env.FNSS_GIT_TAG }} \
+            -X github.com/${{ env.FNSS_REPO }}/internal/app.BuildTime=${{ steps.prepare.outputs.fnss_build_time }} -s -w -buildid=" \
+            .
+      - name: Rename Windows fnss
+        if: matrix.dist.goos == 'windows'
+        run: |
+          cd ${{ github.workspace }}/build_assets || exit 1
+          mv fast-note-sync-service fast-note-sync-service.exe
+
+      - name: Copy config sample file
+        run: |
+          mkdir -p ${{ github.workspace }}/build_assets/config
+          echo "Copy config sample file"
+          cp ${{ github.workspace }}/src/config/config.yaml ${{ github.workspace }}/build_assets/config/config.yaml
+
+      - name: Create tar.gz archive
+        env:
+          ARCH: ${{ matrix.platform.arch }}
+        run: |
+          mkdir -p ${{ github.workspace }}/dist
+          cd ${{ github.workspace }}/build_assets
+          tar -czvf ${{ github.workspace }}/dist/fast-note-sync-service-${{ env.FNSS_VERSION }}-${{ matrix.dist.name }}.tar.gz .
+
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ github.token }}
+          file: ${{ github.workspace }}/dist/*
+          tag: ${{ env.FNSS_GIT_TAG }}
+          file_glob: true
+          release_name: 'Release FNSS ${{ env.FNSS_VERSION }}'
+          overwrite: true
+          prerelease: false
+          body: 'FNSS statically linked version, built `${{ env.FNSS_VERSION }}`.'
