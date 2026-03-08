@@ -159,7 +159,7 @@ func NewRouter(frontendFiles embed.FS, appContainer *app.App, uni *ut.UniversalT
 		folderHandler := api_router.NewFolderHandler(appContainer)
 		fileHandler := api_router.NewFileHandler(appContainer, wss)
 		noteHistoryHandler := api_router.NewNoteHistoryHandler(appContainer, wss)
-		versionHandler := api_router.NewVersionHandler(appContainer)
+		// versionHandler := api_router.NewVersionHandler(appContainer)
 		adminControlHandler := api_router.NewAdminControlHandler(appContainer, wss)
 		shareHandler := api_router.NewShareHandler(appContainer)
 		storageHandler := api_router.NewStorageHandler(appContainer)
@@ -173,8 +173,8 @@ func NewRouter(frontendFiles embed.FS, appContainer *app.App, uni *ut.UniversalT
 
 		// Add server version interface (no auth required)
 		// 添加服务端版本号接口（无需认证）
-		api.GET("/version", versionHandler.ServerVersion)
-		api.GET("/support", versionHandler.Support)
+		// api.GET("/version", versionHandler.ServerVersion)
+		// api.GET("/support", versionHandler.Support)
 		api.GET("/webgui/config", adminControlHandler.Config)
 
 		// Health check interface (no auth required)
