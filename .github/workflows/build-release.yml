@@ -18,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         dist:
-          # its dependency https://github.com/bytedance/sonic does not support 32bit and MIPS arch.
           # windows
           - {
               name: windows-amd64-v1,
@@ -67,6 +66,12 @@ jobs:
               goos: linux,
               goarch: amd64,
               goamd64: v3
+            }
+          - {
+              name: linux-armv7,
+              goos: linux,
+              goarm: 7,
+              goarch: arm
             }
           - {
               name: linux-arm64,
