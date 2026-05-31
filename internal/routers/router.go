@@ -110,7 +110,9 @@ func NewRouter(frontendFiles embed.FS, appContainer *app.App, uni *ut.UniversalT
 
 	// Register OpenAPI/Swagger routes
 	// 注册 OpenAPI/Swagger 路由
-	registerOpenAPIRoutes(r, frontendFiles)
+	if cfg.Server.RunMode != "release" {
+		registerOpenAPIRoutes(r, frontendFiles)
+	}
 
 	r.NoRoute(middleware.NoFound())
 
