@@ -40,7 +40,7 @@ func registerAPIRoutes(r *gin.Engine, appContainer *app.App, wss *pkgapp.Websock
 		folderHandler := api_router.NewFolderHandler(appContainer)
 		fileHandler := api_router.NewFileHandler(appContainer, wss)
 		noteHistoryHandler := api_router.NewNoteHistoryHandler(appContainer, wss)
-		versionHandler := api_router.NewVersionHandler(appContainer)
+		// versionHandler := api_router.NewVersionHandler(appContainer)
 		adminControlHandler := api_router.NewAdminControlHandler(appContainer, wss)
 		shareHandler := api_router.NewShareHandler(appContainer, wss)
 		storageHandler := api_router.NewStorageHandler(appContainer)
@@ -56,8 +56,8 @@ func registerAPIRoutes(r *gin.Engine, appContainer *app.App, wss *pkgapp.Websock
 
 		// Add server version interface (no auth required)
 		// 添加服务端版本号接口（无需认证）
-		api.GET("/version", versionHandler.ServerVersion)
-		api.GET("/support", versionHandler.Support)
+		// api.GET("/version", versionHandler.ServerVersion)
+		// api.GET("/support", versionHandler.Support)
 		api.GET("/webgui/config", adminControlHandler.Config)
 
 		// Health check interface (no auth required)
