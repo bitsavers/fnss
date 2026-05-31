@@ -40,7 +40,7 @@ func registerAPIRoutes(r *gin.Engine, appContainer *app.App, wss *pkgapp.Websock
 		folderHandler := api_router.NewFolderHandler(appContainer)
 		fileHandler := api_router.NewFileHandler(appContainer, wss)
 		noteHistoryHandler := api_router.NewNoteHistoryHandler(appContainer, wss)
-		versionHandler := api_router.NewVersionHandler(appContainer)
+		// versionHandler := api_router.NewVersionHandler(appContainer)
 		adminControlHandler := api_router.NewAdminControlHandler(appContainer, wss)
 		shareHandler := api_router.NewShareHandler(appContainer, wss)
 		storageHandler := api_router.NewStorageHandler(appContainer)
@@ -71,8 +71,8 @@ func registerAPIRoutes(r *gin.Engine, appContainer *app.App, wss *pkgapp.Websock
 
 		// Add server version interface (no auth required)
 		// 添加服务端版本号接口（无需认证）
-		api.GET("/version", versionHandler.ServerVersion)
-		api.GET("/support", versionHandler.Support)
+		// api.GET("/version", versionHandler.ServerVersion)
+		// api.GET("/support", versionHandler.Support)
 
 		// Health check interface (no auth required)
 		// 健康检查接口（无需认证）
@@ -114,7 +114,7 @@ func registerAPIRoutes(r *gin.Engine, appContainer *app.App, wss *pkgapp.Websock
 
 			// Version source latency probe (auth required: triggers real outbound requests)
 			// 版本源延迟探测（需认证：会触发真实的外部网络请求）
-			auth.GET("/version/probe", versionHandler.ProbeSources)
+			// auth.GET("/version/probe", versionHandler.ProbeSources)
 
 			auth.GET("/user/info", userHandler.UserInfo)
 			auth.POST("/oauth/stytch/authorize/start", stytchOAuthHandler.AuthorizeStart)
