@@ -3,8 +3,6 @@
 package api_router
 
 import (
-	"time"
-
 	"github.com/haierkeys/fast-note-sync-service/internal/app"
 	pkgapp "github.com/haierkeys/fast-note-sync-service/pkg/app"
 	"github.com/haierkeys/fast-note-sync-service/pkg/code"
@@ -29,8 +27,8 @@ func NewHealthHandler(a *app.App) *HealthHandler {
 type HealthResponse struct {
 	Status   string  `json:"status"`   // "healthy" or "unhealthy" // "healthy" 或 "unhealthy"
 	Version  string  `json:"version"`  // Service version number // 服务版本号
-	Uptime   float64 `json:"uptime"`   // Uptime (seconds) // 运行时间（秒）
 	Database string  `json:"database"` // "connected" or "error" // "connected" 或 "error"
+	// Uptime   float64 `json:"uptime"`   // Uptime (seconds) // 运行时间（秒）
 }
 
 // Check health check interface
@@ -44,7 +42,7 @@ func (h *HealthHandler) Check(c *gin.Context) {
 	response := HealthResponse{
 		Status:   "healthy",
 		Version:  h.App.Version().Version,
-		Uptime:   time.Since(h.App.StartTime).Seconds(),
+		// Uptime:   time.Since(h.App.StartTime).Seconds(),
 		Database: "connected",
 	}
 
